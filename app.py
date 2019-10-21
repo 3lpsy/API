@@ -2,8 +2,12 @@ import os
 import sys
 import secrets
 from logger import log
-import eventlet
-eventlet.monkey_patch()
+
+use_eventlet = os.environ.get("GUNICORN_SERVER", "eventlet") not in ["embedded", "flask"]
+
+if use_eventlet:
+    import eventlet
+    eventlet.monkey_patch()
 
 from apis.socketio import socketio
 
@@ -106,8 +110,15 @@ def create_app():
 
     log("app.py:CreateApp", "Setting up socketio..")
     # You can add extra logging around socketio by setting the following options here: logger=True, engineio_logger=True
-    socketio.init_app(app, host='0.0.0.0', manage_session=False, message_queue=RABBIT_URL, channel="ConsoleMessages",
-                      cors_allowed_origins="*")
+    socketio.init_app(
+        app, 
+        host='0.0.0.0', 
+        manage_session=False, 
+        message_queue=RABBIT_URL, 
+        channel="ConsoleMessages",
+        cors_allowed_origins="*"
+    )
+
 
     from backend.rabbitmq import rabbit_consumer
     rabbit_consumer.socketio = socketio
@@ -116,6 +127,7 @@ def create_app():
     # Check Upload Dir
     if not os.path.exists(UPLOAD_DIR):
         os.makedirs(UPLOAD_DIR)
+        
     log("app.py:CreateApp", "Finished.")
     return app
 
@@ -124,5 +136,14 @@ app = create_app()
 
 if __name__ == '__main__':
     log("app.py:main", "main starting...")
-    socketio.run(create_app())
-
+    host = os.environ.get("GUNICORN_BIND_ADDRESS", "127.0.0.1")
+    port = int(os.environ.get("GUNICORN_BIND_PORT", 5000))
+    is_debug = int(os.environ.get("GUNICORN_DEBUG", 0)) == 1
+    is_reloading = int(os.environ.get("GUNICORN_RELOAD", 0)) == 1
+    socketio.run(
+        create_app(), 
+        host=host, 
+        port=port, 
+        debug=is_debug, 
+        use_reloader=is_reloading
+    )

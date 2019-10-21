@@ -2,13 +2,18 @@
 
 FROM alpine:3.8
 
+# alternatively could be flask
+ENV GUNICORN_SERVER gunicorn 
 ENV GUNICORN_WORKER_CLASS eventlet
 ENV GUNICORN_WORKERS 1
 ENV GUNICORN_LOGGIN_CONFIG /app/logging.conf
 ENV GUNICORN_TIMEOUT 300
 ENV GUNICORN_BIND_ADDRESS 0.0.0.0
 ENV GUNICORN_BIND_PORT 5000
-env GUNICORN_OPTS ""
+ENV GUNICORN_DEBUG 0
+ENV GUNICORN_RELOAD 0
+ENV GUNICORN_OPTS ""
+
 RUN apk add --no-cache \
             python3 \
             py3-gunicorn \
