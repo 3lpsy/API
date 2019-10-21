@@ -1,0 +1,11 @@
+API_UPLOAD_DIR=/opt/faction/uploads
+FLASK_SECRET=changemehunter2
+POSTGRES_HOST=db
+POSTGRES_DATABASE=faction
+POSTGRES_USERNAME=postgres
+POSTGRES_PASSWORD=changemehunter2
+RABBIT_HOST=mq
+RABBIT_USERNAME=guest
+RABBIT_PASSWORD=changemehunter2
+SERVER=flask
+
