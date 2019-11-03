@@ -9,7 +9,6 @@ from logger import log
 
 socketio = SocketIO()
 
-
 @socketio.on('connect')
 @login_required
 def connect_handler():

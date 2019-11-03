@@ -1,13 +1,16 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import secrets
 from logger import log
 
-use_eventlet = os.environ.get("GUNICORN_SERVER", "eventlet") not in ["embedded", "flask"]
+# USING_FLASK_SERVER = os.environ.get("GUNICORN_SERVER", "eventlet") == "flask"
 
-if use_eventlet:
-    import eventlet
-    eventlet.monkey_patch()
+# if not USING_FLASK_SERVER:
+#     log("app.py:main", "Monkey Patching Eventlet..")
+import eventlet
+eventlet.monkey_patch()
 
 from apis.socketio import socketio
 
@@ -16,7 +19,6 @@ from apis.socketio import socketio
 dev = True
 
 log("app.py:main", "Started..")
-
 
 def create_app():
     from flask import Flask
@@ -110,9 +112,14 @@ def create_app():
 
     log("app.py:CreateApp", "Setting up socketio..")
     # You can add extra logging around socketio by setting the following options here: logger=True, engineio_logger=True
+    host = os.environ.get("GUNICORN_BIND_ADDRESS", "127.0.0.1")
+    port = int(os.environ.get("GUNICORN_BIND_PORT", 5000))
+
     socketio.init_app(
         app, 
-        host='0.0.0.0', 
+        host=host, 
+        port=port,
+        async_mode='eventlet',
         manage_session=False, 
         message_queue=RABBIT_URL, 
         channel="ConsoleMessages",
@@ -140,10 +147,19 @@ if __name__ == '__main__':
     port = int(os.environ.get("GUNICORN_BIND_PORT", 5000))
     is_debug = int(os.environ.get("GUNICORN_DEBUG", 0)) == 1
     is_reloading = int(os.environ.get("GUNICORN_RELOAD", 0)) == 1
+    log("app.py:main", f"Binding on {str(host)}:{str(port)}")
+    log("app.py:main", f"SocketIO Mode is {str(socketio.server.eio.async_mode)}")
+
+    if is_debug:
+        log("app.py:main", "Debug Mode Enabled")
+    if is_reloading:
+        log("app.py:main", "Reloading Enabled")
+
     socketio.run(
-        create_app(), 
+        app, 
         host=host, 
         port=port, 
         debug=is_debug, 
-        use_reloader=is_reloading
+        use_reloader=is_reloading,
+        log_output=True
     )

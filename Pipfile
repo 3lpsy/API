@@ -44,6 +44,7 @@ Flask-Caching = "*"
 json-logging-py = "*"
 dateparser = "*"
 psycopg2 = "*"
+gunicorn = ">=19.9.0"
 
 [requires]
 python_version = "3"

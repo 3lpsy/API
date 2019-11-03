@@ -1,6 +1,6 @@
 ﻿# Largely taken from https://sebest.github.io/post/protips-using-gunicorn-inside-a-docker-image/
 
-FROM alpine:3.8
+FROM alpine:3.10
 
 # alternatively could be flask
 ENV GUNICORN_SERVER gunicorn 
@@ -14,9 +14,10 @@ ENV GUNICORN_DEBUG 0
 ENV GUNICORN_RELOAD 0
 ENV GUNICORN_OPTS ""
 
+# removed, put in pipenv py3-gunicorn \
+
 RUN apk add --no-cache \
             python3 \
-            py3-gunicorn \
             python3-dev \
             g++ \
             make \
@@ -24,13 +25,16 @@ RUN apk add --no-cache \
             libcap \
             musl-dev \
             gcc \
-            postgresql-dev
+            postgresql-dev 
 
+RUN ln -s /usr/bin/python3 /usr/bin/python
 COPY startup.sh /opt/startup.sh
 RUN chmod +x /opt/startup.sh
+RUN mkdir /app
+COPY Pipfile /app/Pipfile
+COPY Pipfile.lock /app/Pipfile.lock
 
-# TODO: add pipfile early
-ADD . /app
+# TODO: add pipfile early, otherwise any changes to files cause pipenv to retrigger?
 WORKDIR /app
 COPY ./docker_build/logging.conf /app/logging.conf
 RUN addgroup -S -g 1337 gunicorn && \
@@ -41,8 +45,10 @@ RUN addgroup -S -g 1337 gunicorn && \
     chown gunicorn:gunicorn ./cache
 
 RUN chown gunicorn:gunicorn /opt/startup.sh
-
 RUN pipenv install --system
+
+ADD . /app
+RUN chmod +x /app/app.py
 
 WORKDIR /app
 EXPOSE 5000
