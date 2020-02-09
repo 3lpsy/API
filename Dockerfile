@@ -47,7 +47,7 @@ RUN apk add --no-cache \
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # make default upload directory
-RUN mkdir -p /opt/faction/uploads/{payloads, files}
+RUN mkdir -p /opt/faction/uploads/{payloads,files}
 
 RUN mkdir /app
 WORKDIR /app
