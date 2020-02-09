@@ -71,7 +71,7 @@ RUN chmod +x /opt/startup.sh
 RUN chown gunicorn:gunicorn /opt/startup.sh
 
 # give gunicorn control over default upload path
-RUN chown gunicorn:gunicorn /opt/faction/uploads
+RUN chown -R gunicorn:gunicorn /opt/faction
 
 # add core app files
 COPY ./docker_build/logging.conf /app/logging.conf
