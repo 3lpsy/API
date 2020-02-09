@@ -46,9 +46,9 @@ RUN apk add --no-cache \
 # symlink to expose "python" command
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# make default upload directory
-RUN mkdir -p /opt/faction/uploads/payloads
-RUN mkdir -p /opt/faction/uploads/files
+# make default upload directory (sh does not like globbing, use two commnads)
+RUN mkdir -p /opt/faction/uploads/payloads && \
+    mkdir -p /opt/faction/uploads/files
 
 RUN mkdir /app
 WORKDIR /app
