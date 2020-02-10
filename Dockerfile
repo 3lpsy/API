@@ -46,10 +46,6 @@ RUN apk add --no-cache \
 # symlink to expose "python" command
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# make default upload directory (sh does not like globbing, use two commnads)
-RUN mkdir -p /opt/faction/uploads/payloads && \
-    mkdir -p /opt/faction/uploads/files
-
 RUN mkdir /app
 WORKDIR /app
 
@@ -64,6 +60,10 @@ RUN addgroup -S -g 1337 gunicorn && \
 COPY Pipfile /app/Pipfile
 COPY Pipfile.lock /app/Pipfile.lock
 RUN pipenv install --system
+
+# make default upload directory (sh does not like globbing, use two commnads)
+RUN mkdir -p /opt/faction/uploads/payloads && \
+    mkdir -p /opt/faction/uploads/files
 
 # add and configure startup.sh file
 COPY startup.sh /opt/startup.sh 
